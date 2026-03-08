@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velammal School Portal</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--teal:#1a7a6e;--green:#2ecc71;--red:#e74c3c;--dark:#1a2332;--bg:#f0f4f8;--shadow:0 8px 32px rgba(26,122,110,0.13);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);min-height:100vh;}
+.page{display:none;min-height:100vh;flex-direction:column;}
+.page.active{display:flex;}
+.hero{background:linear-gradient(135deg,#1a2332 0%,#1a7a6e 60%,#2ecc71 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;width:500px;height:500px;background:rgba(46,204,113,0.07);border-radius:50%;top:-150px;right:-150px;animation:pulse 6s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.hero-content{display:flex;flex-direction:column;align-items:center;gap:14px;z-index:2;animation:fadeUp 0.7s ease both;}
+.school-logo{width:80px;height:80px;border-radius:50%;background:white;padding:8px;box-shadow:0 8px 30px rgba(0,0,0,0.25);object-fit:contain;}
+.school-name{font-size:2.4rem;font-weight:800;color:white;letter-spacing:2px;}
+.school-tag{color:rgba(255,255,255,0.65);font-size:0.82rem;letter-spacing:3px;text-transform:uppercase;}
+.btn-group{display:flex;gap:14px;margin-top:16px;flex-wrap:wrap;justify-content:center;}
+.btn{padding:13px 32px;border:none;border-radius:50px;font-family:'Poppins',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.25s;}
+.btn-white{background:white;color:var(--teal);}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,255,255,0.3);}
+.btn-outline{background:rgba(255,255,255,0.1);color:white;border:2px solid rgba(255,255,255,0.35);}
+.btn-outline:hover{background:rgba(255,255,255,0.2);transform:translateY(-2px);}
+.btn-teal{background:var(--teal);color:white;width:100%;border:none;padding:12px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.25s;margin-top:4px;}
+.btn-teal:hover{background:#156459;}
+.btn-teal:disabled{opacity:0.6;cursor:not-allowed;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(26,35,50,0.65);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:white;border-radius:18px;padding:34px;width:90%;max-width:390px;box-shadow:0 30px 80px rgba(0,0,0,0.25);animation:fadeUp 0.35s ease both;position:relative;}
+.modal-logo{width:46px;height:46px;object-fit:contain;border-radius:50%;border:2px solid var(--teal);display:block;margin:0 auto 12px;}
+.modal-title{text-align:center;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:4px;}
+.modal-sub{text-align:center;color:#999;font-size:0.8rem;margin-bottom:20px;}
+.modal-close{position:absolute;top:14px;right:18px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#bbb;}
+.modal-close:hover{color:var(--dark);}
+.lbl{display:block;font-size:0.73rem;font-weight:600;color:#666;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;}
+.inp{width:100%;padding:11px 14px;border:2px solid #e8edf2;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.95rem;outline:none;transition:border 0.2s;background:#fafbfc;margin-bottom:14px;}
+.inp:focus{border-color:var(--teal);background:white;}
+.err{color:var(--red);font-size:0.78rem;margin-bottom:10px;display:none;}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin:10px 0 16px;}
+.pin-dot{width:13px;height:13px;border-radius:50%;border:2px solid #ccc;background:#eee;transition:all 0.2s;}
+.pin-dot.filled{background:var(--teal);border-color:var(--teal);transform:scale(1.15);}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.np{padding:13px;border:2px solid #e8edf2;border-radius:10px;background:#fafbfc;font-size:1.15rem;font-weight:700;cursor:pointer;transition:all 0.15s;color:var(--dark);font-family:'Poppins',sans-serif;}
+.np:hover{background:var(--teal);color:white;border-color:var(--teal);}
+.np.del{font-size:0.9rem;color:var(--red);}
+.np.del:hover{background:var(--red);color:white;border-color:var(--red);}
+.dash-header{background:linear-gradient(135deg,#1a2332,#1a7a6e);color:white;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:58px;box-shadow:0 2px 16px rgba(0,0,0,0.15);flex-shrink:0;}
+.hdr-left{display:flex;align-items:center;gap:10px;}
+.hdr-logo{width:30px;height:30px;border-radius:50%;background:white;padding:4px;object-fit:contain;}
+.hdr-name{font-weight:700;font-size:0.92rem;}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.user-pill{background:rgba(255,255,255,0.13);border-radius:50px;padding:5px 13px;display:flex;align-items:center;gap:8px;font-size:0.82rem;}
+.av{width:25px;height:25px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.73rem;}
+.login-today-btn{display:flex;align-items:center;gap:7px;padding:7px 16px;border-radius:50px;border:none;font-family:'Poppins',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.25s;background:var(--green);color:white;box-shadow:0 3px 12px rgba(46,204,113,0.4);}
+.login-today-btn:hover{transform:translateY(-2px);box-shadow:0 5px 18px rgba(46,204,113,0.5);}
+.login-today-btn.done{background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);box-shadow:none;cursor:default;}
+.login-today-btn.done:hover{transform:none;}
+.dot-pulse{width:8px;height:8px;border-radius:50%;background:white;animation:dotpulse 1.2s ease-in-out infinite;}
+@keyframes dotpulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.7);}}
+.login-today-btn.done .dot-pulse{animation:none;background:rgba(255,255,255,0.5);}
+.logout-btn{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);color:white;border-radius:50px;padding:5px 13px;font-family:'Poppins',sans-serif;font-size:0.76rem;cursor:pointer;}
+.logout-btn:hover{background:rgba(255,255,255,0.2);}
+.t-main{flex:1;padding:22px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;}
+.welcome-card{background:white;border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);flex-wrap:wrap;gap:12px;}
+.welcome-card h2{font-size:1.2rem;color:var(--dark);}
+.welcome-card p{color:#999;font-size:0.8rem;margin-top:3px;}
+.stat-box{background:linear-gradient(135deg,var(--teal),var(--green));color:white;border-radius:12px;padding:11px 20px;text-align:center;}
+.stat-box .num{font-size:1.8rem;font-weight:800;}
+.stat-box .lbl2{font-size:0.68rem;opacity:0.85;text-transform:uppercase;letter-spacing:1px;}
+.info-card{background:white;border-radius:14px;padding:20px;box-shadow:var(--shadow);}
+.info-card h3{font-size:0.92rem;color:var(--dark);margin-bottom:13px;font-weight:700;}
+.info-row{display:flex;gap:10px;margin-bottom:8px;}
+.info-row span:first-child{font-weight:600;color:#555;min-width:80px;font-size:0.8rem;}
+.info-row span:last-child{color:#888;font-size:0.8rem;}
+.a-main{flex:1;padding:22px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:680px){.grid2{grid-template-columns:1fr;}}
+.a-card{background:white;border-radius:14px;padding:20px;box-shadow:var(--shadow);}
+.a-card h3{font-size:0.92rem;color:var(--dark);margin-bottom:14px;font-weight:700;}
+.full{grid-column:1/-1;}
+.t-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f0f0;}
+.t-row:last-child{border-bottom:none;}
+.t-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--green));color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.82rem;flex-shrink:0;}
+.t-info{flex:1;}
+.t-info strong{display:block;font-size:0.85rem;color:var(--dark);}
+.t-info small{color:#aaa;font-size:0.71rem;}
+.t-badge{font-size:0.65rem;font-weight:600;padding:2px 8px;border-radius:20px;}
+.online{background:#e8faf1;color:#27ae60;}
+.offline{background:#fdf0f0;color:#e74c3c;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-hdr{text-align:center;font-size:0.6rem;font-weight:700;color:#bbb;text-transform:uppercase;padding-bottom:4px;}
+.cal-day{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.67rem;font-weight:600;}
+.cal-day.present{background:#d5f5e3;color:#1e8449;}
+.cal-day.absent{background:#fadbd8;color:#c0392b;}
+.cal-day.empty{background:transparent;color:#e0e0e0;}
+.cal-day.today{outline:2px solid var(--teal);}
+.legend{display:flex;gap:12px;margin-top:8px;font-size:0.71rem;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:9px;height:9px;border-radius:2px;}
+.dg{background:#d5f5e3;border:1px solid #1e8449;}
+.dr{background:#fadbd8;border:1px solid #c0392b;}
+.stats-row{display:flex;gap:12px;flex-wrap:wrap;}
+.s-box{flex:1;min-width:90px;background:white;border-radius:12px;padding:14px;box-shadow:var(--shadow);text-align:center;}
+.s-box .n{font-size:1.7rem;font-weight:800;color:var(--teal);}
+.s-box .l{font-size:0.66rem;color:#aaa;text-transform:uppercase;letter-spacing:1px;}
+.tab-btn{padding:5px 13px;border-radius:20px;border:2px solid #e0e0e0;background:white;font-family:'Poppins',sans-serif;font-size:0.75rem;cursor:pointer;transition:0.2s;font-weight:600;color:#888;}
+.tab-btn.active{background:var(--teal);color:white;border-color:var(--teal);}
+.spinner-wrap{display:flex;align-items:center;justify-content:center;gap:10px;color:#aaa;font-size:0.85rem;padding:20px;}
+.spinner{width:20px;height:20px;border:2px solid #eee;border-top-color:var(--teal);border-radius:50%;animation:spin 0.7s linear infinite;}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--dark);color:white;padding:10px 22px;border-radius:50px;font-size:0.84rem;transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);z-index:9999;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+#toast.ok{background:#27ae60;}
+#toast.er{background:var(--red);}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- HOME -->
+<div class="page active" id="pg-home">
+  <div class="hero">
+    <div class="hero-content">
+      <img class="school-logo" src="icon.png" alt="Velammal">
+      <div class="school-name">Velammal</div>
+      <div class="school-tag">School Management Portal</div>
+      <div class="btn-group">
+        <button class="btn btn-white" onclick="openModal('modal-login')">🎓 Login to School</button>
+        <button class="btn btn-outline" onclick="openModal('modal-admin-pass')">🔐 Admin Check</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TEACHER DASHBOARD -->
+<div class="page" id="pg-teacher">
+  <div class="dash-header">
+    <div class="hdr-left">
+      <img class="hdr-logo" src="icon.png" alt="">
+      <span class="hdr-name">Velammal Portal</span>
+    </div>
+    <div class="hdr-right">
+      <button class="login-today-btn" id="login-today-btn" onclick="loginToday()">
+        <div class="dot-pulse"></div>
+        <span id="login-today-text">Login Today</span>
+      </button>
+      <div class="user-pill"><div class="av" id="t-av">T</div><span id="t-name-hdr">Teacher</span></div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="t-main">
+    <div class="welcome-card">
+      <div>
+        <h2>Welcome back, <span id="t-greeting">Teacher</span> 👋</h2>
+        <p id="t-meta">Loading...</p>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="t-days">0</div>
+        <div class="lbl2">Days Logged In</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <h3>📋 Your Profile</h3>
+      <div class="info-row"><span>Name</span><span id="t-p-name">—</span></div>
+      <div class="info-row"><span>Section</span><span id="t-p-section">—</span></div>
+      <div class="info-row"><span>Last Login</span><span id="t-p-last">—</span></div>
+    </div>
+    <div class="info-card">
+      <h3>📅 Your Attendance This Month</h3>
+      <div class="cal-grid" id="t-cal"></div>
+      <div class="legend"><span><div class="dot dg"></div>Present</span><span><div class="dot dr"></div>Absent</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="page" id="pg-admin">
+  <div class="dash-header">
+    <div class="hdr-left">
+      <img class="hdr-logo" src="icon.png" alt="">
+      <span class="hdr-name">Velammal — Admin Panel</span>
+    </div>
+    <div style="display:flex;align-items:center;">
+      <div class="user-pill"><div class="av" style="background:#e67e22;">A</div><span>Admin</span></div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="a-main">
+    <div class="stats-row">
+      <div class="s-box"><div class="n" id="adm-total">—</div><div class="l">Teachers</div></div>
+      <div class="s-box"><div class="n" id="adm-today">—</div><div class="l">Today</div></div>
+      <div class="s-box"><div class="n" id="adm-rate">—</div><div class="l">Rate</div></div>
+    </div>
+    <div class="grid2">
+      <div class="a-card">
+        <h3>👩‍🏫 Teacher Directory</h3>
+        <div id="teacher-list"><div class="spinner-wrap"><div class="spinner"></div> Loading...</div></div>
+      </div>
+      <div class="a-card">
+        <h3>➕ Add New Teacher</h3>
+        <label class="lbl">Full Name</label>
+        <input class="inp" id="new-name" placeholder="e.g. Mrs. Priya Sharma">
+        <label class="lbl">Section</label>
+        <input class="inp" id="new-section" placeholder="e.g. Grade 5-A">
+        <label class="lbl">6-Digit PIN</label>
+        <input class="inp" id="new-pin" type="password" placeholder="e.g. 123456" maxlength="6">
+        <div class="err" id="add-err">Fill all fields. PIN must be exactly 6 digits.</div>
+        <button class="btn-teal" id="add-btn" onclick="addTeacher()">Add Teacher</button>
+      </div>
+      <div class="a-card full">
+        <h3>📅 Attendance — <span id="adm-cal-title">Select a teacher</span></h3>
+        <div id="adm-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
+        <div class="cal-grid" id="adm-cal"></div>
+        <div class="legend"><span><div class="dot dg"></div>Present</span><span><div class="dot dr"></div>Absent</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Login -->
+<div class="overlay" id="modal-login">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-login')">×</button>
+    <img class="modal-logo" src="icon.png" alt="">
+    <div class="modal-title">Teacher Login</div>
+    <div class="modal-sub">Velammal School — Enter your name</div>
+    <label class="lbl">Your Name</label>
+    <input class="inp" id="s-name" placeholder="Enter your full name" onkeydown="if(event.key==='Enter')studentNext()">
+    <div class="err" id="s-err">Name not found. Please ask admin to add you.</div>
+    <button class="btn-teal" id="login-btn" onclick="studentNext()">Continue →</button>
+  </div>
+</div>
+
+<!-- MODAL: PIN -->
+<div class="overlay" id="modal-pin">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-pin')">×</button>
+    <img class="modal-logo" src="icon.png" alt="">
+    <div class="modal-title">Enter PIN</div>
+    <div class="modal-sub" id="pin-sub">Enter your 6-digit PIN</div>
+    <div class="pin-dots" id="pin-dots"></div>
+    <div class="err" id="pin-err" style="text-align:center;">Incorrect PIN. Try again.</div>
+    <div class="numpad" id="numpad"></div>
+  </div>
+</div>
+
+<!-- MODAL: Admin -->
+<div class="overlay" id="modal-admin-pass">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-admin-pass')">×</button>
+    <img class="modal-logo" src="icon.png" alt="">
+    <div class="modal-title">Admin Access</div>
+    <div class="modal-sub">Enter the admin passcode</div>
+    <label class="lbl">Passcode</label>
+    <input class="inp" id="adm-pass-inp" type="password" placeholder="Enter passcode" onkeydown="if(event.key==='Enter')checkAdmin()">
+    <div class="err" id="adm-pass-err">Incorrect passcode.</div>
+    <button class="btn-teal" onclick="checkAdmin()">Access Admin Panel</button>
+  </div>
+</div>
+
+<script>
+// ── Supabase config (REST API — no SDK needed) ─────────────────
+const SB_URL = 'https://kowdlobyuinshyakqhpe.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtvd2Rsb2J5dWluc2h5YWtxaHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTgzOTksImV4cCI6MjA4ODQ3NDM5OX0.zGdxVJ4l4H9JuR32opmIsijc8vYk2T-gsmrutjD0tMc';
+
+// Generic REST helpers
+async function sbGet(table, params='') {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, {
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json'
+    }
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function sbInsert(table, body) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function sbUpdate(table, id, body) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ── Constants ──────────────────────────────────────────────────
+const ADMIN_PASS = 'Dynamox@456';
+const TODAY      = new Date().toISOString().slice(0, 10);
+
+let currentTeacher = null;
+let pinBuffer      = '';
+let allTeachers    = [];
+
+// ── UI helpers ─────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function showPage(id)   { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'show ' + (type === 'ok' ? 'ok' : type === 'er' ? 'er' : '');
+  setTimeout(() => t.className = '', 2800);
+}
+
+function setBtn(id, loading, label) {
+  const b = document.getElementById(id);
+  if (!b) return;
+  b.disabled    = loading;
+  b.textContent = loading ? '⏳ Please wait...' : label;
+}
+
+// ── Step 1: name lookup ────────────────────────────────────────
+async function studentNext() {
+  const name = document.getElementById('s-name').value.trim();
+  const err  = document.getElementById('s-err');
+  err.style.display = 'none';
+  if (!name) { err.textContent = 'Please enter your name.'; err.style.display = 'block'; return; }
+
+  setBtn('login-btn', true, 'Continue →');
+  try {
+    const data = await sbGet('teachers', `name=ilike.${encodeURIComponent(name)}&limit=1`);
+    if (!data || data.length === 0) {
+      err.textContent   = 'Name not found. Ask admin to add you.';
+      err.style.display = 'block';
+      setBtn('login-btn', false, 'Continue →');
+      return;
+    }
+    currentTeacher = data[0];
+    document.getElementById('pin-sub').textContent = `Welcome ${currentTeacher.name.split(' ').slice(-1)[0]}! Enter your 6-digit PIN`;
+    closeModal('modal-login');
+    openModal('modal-pin');
+    buildNumpad();
+    resetPinDots();
+  } catch(e) {
+    toast('Connection error: ' + e.message, 'er');
+  }
+  setBtn('login-btn', false, 'Continue →');
+}
+
+// ── PIN ────────────────────────────────────────────────────────
+function buildNumpad() {
+  pinBuffer = '';
+  const np  = document.getElementById('numpad');
+  np.innerHTML = '';
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(k => {
+    const b = document.createElement('button');
+    b.className  = 'np' + (k === '⌫' ? ' del' : '');
+    b.textContent = k;
+    if (k === '') b.style.visibility = 'hidden';
+    else b.onclick = () => pinPress(String(k));
+    np.appendChild(b);
+  });
+}
+function resetPinDots() {
+  pinBuffer = '';
+  const d = document.getElementById('pin-dots');
+  d.innerHTML = '';
+  for (let i = 0; i < 6; i++) { const s = document.createElement('div'); s.className = 'pin-dot'; d.appendChild(s); }
+  document.getElementById('pin-err').style.display = 'none';
+}
+function updateDots() {
+  document.querySelectorAll('#pin-dots .pin-dot').forEach((d, i) => d.classList.toggle('filled', i < pinBuffer.length));
+}
+function pinPress(k) {
+  if (k === '⌫') { pinBuffer = pinBuffer.slice(0, -1); updateDots(); return; }
+  if (pinBuffer.length >= 6) return;
+  pinBuffer += k; updateDots();
+  if (pinBuffer.length === 6) setTimeout(verifyPin, 200);
+}
+function verifyPin() {
+  if (pinBuffer === String(currentTeacher.pin)) {
+    closeModal('modal-pin');
+    document.getElementById('s-name').value = '';
+    loadTeacherDash(currentTeacher);
+    showPage('pg-teacher');
+    toast('Welcome ' + currentTeacher.name.split(' ').slice(-1)[0] + '! ✅', 'ok');
+  } else {
+    document.getElementById('pin-err').style.display = 'block';
+    pinBuffer = ''; updateDots();
+  }
+}
+
+// ── Login Today ────────────────────────────────────────────────
+async function loginToday() {
+  if (!currentTeacher) return;
+  const logins = Array.isArray(currentTeacher.logins) ? currentTeacher.logins : [];
+  if (logins.includes(TODAY)) { toast('Already marked present today ✓', 'ok'); return; }
+
+  const btn  = document.getElementById('login-today-btn');
+  btn.disabled = true;
+
+  try {
+    const updatedLogins = [...logins, TODAY];
+    await sbUpdate('teachers', currentTeacher.id, { logins: updatedLogins });
+    currentTeacher.logins = updatedLogins;
+    updateLoginTodayBtn(currentTeacher);
+    loadTeacherDash(currentTeacher);
+    toast('Attendance marked for today! 🟢', 'ok');
+  } catch(e) {
+    toast('Failed to save attendance.', 'er');
+  }
+  btn.disabled = false;
+}
+
+function updateLoginTodayBtn(teacher) {
+  const btn  = document.getElementById('login-today-btn');
+  const text = document.getElementById('login-today-text');
+  const logins = Array.isArray(teacher.logins) ? teacher.logins : [];
+  if (logins.includes(TODAY)) {
+    btn.classList.add('done');
+    text.textContent = '✓ Logged Today';
+  } else {
+    btn.classList.remove('done');
+    text.textContent = 'Login Today';
+  }
+}
+
+// ── Teacher Dashboard ──────────────────────────────────────────
+function loadTeacherDash(teacher) {
+  const logins = Array.isArray(teacher.logins) ? teacher.logins : [];
+  const first  = teacher.name.split(' ').slice(-1)[0];
+  document.getElementById('t-greeting').textContent  = first;
+  document.getElementById('t-av').textContent        = first[0];
+  document.getElementById('t-name-hdr').textContent  = teacher.name;
+  document.getElementById('t-meta').textContent      = `Section: ${teacher.section} • ${new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}`;
+  document.getElementById('t-days').textContent      = logins.length;
+  document.getElementById('t-p-name').textContent    = teacher.name;
+  document.getElementById('t-p-section').textContent = teacher.section;
+  document.getElementById('t-p-last').textContent    = logins.length ? logins[logins.length - 1] : 'Never';
+  updateLoginTodayBtn(teacher);
+  buildCalendar('t-cal', logins);
+}
+
+// ── Calendar ──────────────────
+function buildCalendar(elId, loginDays) {
+  const el = document.getElementById(elId);
+  const now = new Date(), year = now.getFullYear(), month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay    = new Date(year, month, 1).getDay();
+  let html = ['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => `<div class="cal-hdr">${d}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds      = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const present = loginDays.includes(ds);
+    const isPast  = new Date(ds) < new Date(TODAY);
+    const isToday = ds === TODAY;
+    let cls = 'cal-day';
+    if (present)      cls += ' present';
+    else if (isPast)  cls += ' absent';
+    else              cls += ' empty';
+    if (isToday)      cls += ' today';
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+// ── Admin ─────────────────────────────
+function checkAdmin() {
+  const v = document.getElementById('adm-pass-inp').value;
+  if (v === ADMIN_PASS) {
+    document.getElementById('adm-pass-err').style.display = 'none';
+    document.getElementById('adm-pass-inp').value = '';
+    closeModal('modal-admin-pass');
+    showPage('pg-admin');
+    loadAdminDash();
+    toast('Admin access granted 🔓', 'ok');
+  } else {
+    document.getElementById('adm-pass-err').style.display = 'block';
+  }
+}
+
+async function loadAdminDash() {
+  document.getElementById('teacher-list').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div> Loading...</div>';
+
+  try {
+    allTeachers = await sbGet('teachers', 'order=name.asc');
+  } catch(e) {
+    toast('Failed to load teachers: ' + e.message, 'er');
+    return;
+  }
+
+  const todayLogins = allTeachers.filter(t => (Array.isArray(t.logins) ? t.logins : []).includes(TODAY)).length;
+  document.getElementById('adm-total').textContent = allTeachers.length;
+  document.getElementById('adm-today').textContent = todayLogins;
+  document.getElementById('adm-rate').textContent  = allTeachers.length ? Math.round((todayLogins / allTeachers.length) * 100) + '%' : '0%';
+
+  // List
+  const list = document.getElementById('teacher-list');
+  if (!allTeachers.length) {
+    list.innerHTML = '<p style="color:#aaa;font-size:0.83rem;text-align:center;padding:16px;">No teachers added yet.</p>';
+  } else {
+    list.innerHTML = '';
+    allTeachers.forEach(t => {
+      const logins   = Array.isArray(t.logins) ? t.logins : [];
+      const initials = t.name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const isOnline = logins.includes(TODAY);
+      const div = document.createElement('div'); div.className = 't-row';
+      div.innerHTML = `
+        <div class="t-av">${initials}</div>
+        <div class="t-info"><strong>${t.name}</strong><small>${t.section} • ${logins.length} day(s)</small></div>
+        <span class="t-badge ${isOnline ? 'online' : 'offline'}">${isOnline ? '✓ Today' : '–'}</span>`;
+      list.appendChild(div);
+    });
+  }
+
+  // Calendar tabs
+  const tabs = document.getElementById('adm-tabs');
+  tabs.innerHTML = '';
+  document.getElementById('adm-cal').innerHTML = '';
+  if (allTeachers.length) {
+    document.getElementById('adm-cal-title').textContent = allTeachers[0].name + ' — ' + new Date().toLocaleString('default', {month:'long', year:'numeric'});
+    allTeachers.forEach((t, i) => {
+      const b = document.createElement('button');
+      b.className   = 'tab-btn' + (i === 0 ? ' active' : '');
+      b.textContent = t.name.split(' ').slice(-1)[0];
+      b.onclick = () => {
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        buildCalendar('adm-cal', Array.isArray(t.logins) ? t.logins : []);
+        document.getElementById('adm-cal-title').textContent = t.name + ' — ' + new Date().toLocaleString('default', {month:'long', year:'numeric'});
+      };
+      tabs.appendChild(b);
+    });
+    buildCalendar('adm-cal', Array.isArray(allTeachers[0].logins) ? allTeachers[0].logins : []);
+  } else {
+    document.getElementById('adm-cal-title').textContent = 'No teachers yet';
+  }
+}
+
+async function addTeacher() {
+  const name    = document.getElementById('new-name').value.trim();
+  const section = document.getElementById('new-section').value.trim();
+  const pin     = document.getElementById('new-pin').value.trim();
+  const err     = document.getElementById('add-err');
+
+  if (!name || !section || !/^\d{6}$/.test(pin)) {
+    err.style.display = 'block'; return;
+  }
+  err.style.display = 'none';
+
+  setBtn('add-btn', true, 'Add Teacher');
+  try {
+    await sbInsert('teachers', { name, section, pin, logins: [] });
+    document.getElementById('new-name').value    = '';
+    document.getElementById('new-section').value = '';
+    document.getElementById('new-pin').value     = '';
+    await loadAdminDash();
+    toast(name + ' added successfully ✅', 'ok');
+  } catch(e) {
+    toast('Failed to add teacher. Check RLS policy in Supabase.', 'er');
+    console.error(e);
+  }
+  setBtn('add-btn', false, 'Add Teacher');
+}
+
+// ── Logout ─────────────────────────────────────────────────────
+function logout() {
+  currentTeacher = null;
+  pinBuffer      = '';
+  allTeachers    = [];
+  showPage('pg-home');
+  toast('Logged out');
+}
+</script>
+</body>
+</html>
